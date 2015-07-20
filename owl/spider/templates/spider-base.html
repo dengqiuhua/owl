@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>{% block title %}title-{% endblock %}蜘蛛-搜索</title>
+    <link href="/static/img/icon/favicon.ico" type="image/x-icon" rel="shortcut icon" />
+    <link type="text/css" rel="stylesheet" media="all" href="/static/css/bootstrap.min.css"/>
+    <link type="text/css" rel="stylesheet" media="all" href="/static/css/owl-style.css"/>
+    <script type="text/javascript" src="/static/js/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/jquery.cookie.js"></script>
+</head>
+<body>
+{% include 'spider-header.html' %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            {% include 'spider-left-menu.html' %}
+        </div>
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            {% block main %}main-{% endblock %}
+        </div>
+    </div>
+
+</div>
+
+{% include 'spider-footer.html' %}
+</body>
+</html>

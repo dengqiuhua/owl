@@ -1,0 +1,37 @@
+{% extends 'spider-base.html' %}
+{% block title %}{% endblock %}
+
+{% block main %}
+
+    <!--*****************************内容start*************************************-->
+    <h1 class="page-header">爬行url</h1>
+    <div class="container">
+        <div class="" id="search-plan">
+
+            <form id="form-search" class="form-horizontal">
+                <div class="form-group">
+                    <div class="col-sm-10">
+                      <input type="text" class="form-control" id="inputUrl" placeholder="url" value="http://" onkeypress="if(event.keyCode==13||event.which==13){addCrawl();}">
+                    </div>
+                    <button type="button" class="btn btn-default col-sm-2" onclick="addCrawl();">添加队列</button>
+              </div>
+
+            </form>
+        </div>
+
+        <div id="url_queue" class="row">
+
+        </div>
+
+
+    </div>
+
+    <!--*****************************内容end*************************************-->
+    <script type="text/javascript">
+    var urls = {
+                api_crawl : "{% url "api-spider-crawl" %}"
+            }
+
+    </script>
+    <script type="text/javascript" src="/static/jsdata/crawl.js"></script>
+{% endblock %}

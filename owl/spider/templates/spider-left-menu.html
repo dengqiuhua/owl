@@ -1,0 +1,16 @@
+
+<ul class="nav nav-sidebar">
+  <li class="{% ifequal leftnav 1 %}active{% endifequal %}"><a href="{% url "spider-index" %}">首页 </a></li>
+  <li class="{% ifequal leftnav 2 %}active{% endifequal %}"><a href="{% url "spider-crawl" %}">爬行</a></li>
+  <li class="{% ifequal leftnav 3 %}active{% endifequal %}"><a href="{% url "spider-list" %}">url库</a></li>
+
+</ul>
+<!--
+<ul class="nav nav-sidebar">
+  <li><a href="">Nav item<span class="sr-only"></span></a></li>
+  <li><a href="">Nav item again</a></li>
+  <li><a href="">One more nav</a></li>
+  <li><a href="">Another nav item</a></li>
+  <li><a href="">More navigation</a></li>
+</ul>
+-->
