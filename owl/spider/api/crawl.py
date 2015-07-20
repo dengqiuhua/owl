@@ -79,15 +79,24 @@ class Crawl(object):
         text_content_list = self.separatewords(text_content)
         self.add_location(urlinfo,text_content_list,4)
 
+    '''提取分词'''
+
     def separatewords(self,text):
         sys.setrecursionlimit(10000)
         lenth = len(text)
         text_list = []
-        text = text.decode("utf-8")
-        for i in range(lenth):
-            text_list.append(text[i])
-        return text_list
-
+        if not type(text) is unicode:
+            try:
+                text = unicode(text,"utf-8")
+            except:
+                text = unicode(text,"gbk")
+        # 提取中文
+        blocks = re.split(ur"([^\u4E00-\u9FA5]+)",sentence)
+        for block_words in blocks:
+            if re.match(ur"[\u4E00-\u9FA5]+",block_words):
+                for i in range(lenth):
+                    text_list.append(block_words[i])
+                return text_list
 
     def add_location(self,urlinfo,words,type = 0):
         if not words:return
