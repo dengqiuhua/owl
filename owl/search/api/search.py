@@ -10,8 +10,6 @@ class Search(object):
     def getResult(self,kw,pageindex = 1, pagesize = 10):
         keywords = self.separatewords(kw)
         if keywords:
-            #wordlist = WordInfo.objects.filter(word__in=keywords)
-            #keywords = [u"美",u"课"]
             wordlist = []
             for word in keywords:
                 try:
@@ -19,8 +17,9 @@ class Search(object):
                 except:
                     continue
                 wordlist.append(wordinfo)
-            location = WordLocation.objects.filter(word__in = wordlist).order_by("location")[(pageindex - 1) * pagesize:pagesize * pageindex]#.query.group_by("url")#
-            return location,location.count()
+            location = WordLocation.objects.filter(word__in = wordlist).order_by("location")#[(pageindex - 1) * pagesize:pagesize * pageindex]#.query.group_by("url")#
+            counts = WordLocation.objects.filter(word__in = wordlist).count()
+            return location,counts
         return [],0
 
     '''提取分词'''
