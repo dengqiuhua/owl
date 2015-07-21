@@ -24,6 +24,7 @@ class WordInfo(models.Model):
     spell = models.CharField(max_length=30,null=True)
     code = models.IntegerField(null=True)
     lang = models.CharField(max_length=10,null=True)
+    score = models.IntegerField(default=0 , null=True)
 
 class WordLocation(models.Model):
     class Meta:
@@ -48,5 +49,5 @@ class LinkWords(models.Model):
     class Meta:
         db_table = 'spider_link_words'
 
-    link = models.ForeignKey(UrlInfo)
+    link = models.ForeignKey(LinkInfo)
     word = models.ForeignKey(WordInfo,null=True)

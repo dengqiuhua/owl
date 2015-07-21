@@ -9,9 +9,21 @@
     <div id="datalist" class="row">
 
     </div>
+    <nav><div class="pagination"></div></nav>
 
 
 
     <!--*****************************内容end*************************************-->
-    <script type="text/javascript" src="/static/jsdata/url-list.js"></script>
+    <script type="text/javascript">
+     var urls = {
+                api_crawl : "{% url "api-spider-crawl" %}"
+            }
+
+    </script>
+    <script type="text/javascript" src="/static/jsdata/crawl.js"></script>
+    <script type="text/javascript">
+        $(function(){
+            getUrlList();
+        });
+    </script>
 {% endblock %}

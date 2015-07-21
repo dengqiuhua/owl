@@ -1,4 +1,5 @@
 body{padding-top: 44px;}
+footer{text-align: center; margin-top: 20px;}
 #search-plan {
     margin: 0 auto;
     margin-top: 10%;
@@ -9,3 +10,5 @@ body{padding-top: 44px;}
 #form-search {
     margin-top: 60px;
 }
+#spider-search{margin-bottom: 32px;}
+.nav-sidebar li.active a{background-color:#428bca;color: #fff;}

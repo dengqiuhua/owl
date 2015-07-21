@@ -4,15 +4,16 @@ from owl.scripts.func import singleton,md5
 from bs4 import BeautifulSoup
 from urlparse import urljoin
 from owl.spider.models import UrlInfo,WordInfo,WordLocation,LinkInfo,LinkWords
-import urllib2,time,sys
+import urllib2,time,sys,re
 
 @singleton
 class Crawl(object):
-    ignorewords = ["的","了","是","就","吗","呢","啊","，","。","？","；","《","》","：",".","（","）","“","”","／","<",">","……","＃","$","％","@","-"]
+    ignorewords = [u"的",u"了",u"是",u"就",u"吗",u"呢",u"啊",u"，",u"。",u"？",u"；u",u"《",u"》",u"：u",u".",u"（",u"）u",u"“",u"”",u"／",u"<",u">",u"……",u"＃",u"$",u"％",u"@",u"-"]
 
     def __init__(self):
         #递归数
         sys.setrecursionlimit(10000)
+        #self.ignorewords = unicode(self.ignorewords,"utf-8")
 
     def main(self,urllist,dep=0):
         for domain in urllist:
@@ -41,62 +42,70 @@ class Crawl(object):
                         if url[0:4] == "http" and url != domain :
                             if not UrlInfo.isIndexed(md5(url)):
                                 newpages.append(url)
-                            link_text = self.get_content(link)
+                            link_text = self.get_content(link,0)
                             # 添加到链接来源
                             self.add_link(domain,url,link_text)
-                #递归获取
-                if newpages and dep <2:
-                    pass
-                    #self.main(newpages, dep+1)
+                #递归获取，不大于3级目录
+                if newpages and dep < 3:
+                    self.main(newpages, dep+1)
                 else:
-                    return
+                    continue
             else:
                 continue
         return True
 
 
+    '''添加索引'''
 
     def add_index(self,domain,soup):
         url_encrypt = md5(domain)
         if UrlInfo.isIndexed(url_encrypt):return
         # 插入url
+        #if not UrlInfo.isIndexed(url_encrypt):
         urlinfo = UrlInfo.objects.create(url=domain,url_encrypt=url_encrypt,createtime=time.time())
+        #else:
+            #urlinfo = UrlInfo.objects.get(url_encrypt=url_encrypt)
         #start_index = 0
         # 提取title
-        text_title = soup.html.head.title
-        text_title_list = self.separatewords(text_title)
-        self.add_location(urlinfo,text_title_list,1)
+        if soup.html.head.title:
+            text_title = soup.html.head.title.get_text().strip()
+            text_title_list = self.separatewords(text_title)
+            self.add_location(urlinfo,text_title_list,1)
         # 获取关键字
-        text_keywords = soup.html.head.keyword
-        text_keywords_list = self.separatewords(text_keywords)
-        self.add_location(urlinfo,text_keywords_list,2)
+        if soup.html.head.keywords:
+            text_keywords = soup.html.head.keywords.get_text().strip()
+            text_keywords_list = self.separatewords(text_keywords)
+            self.add_location(urlinfo,text_keywords_list,2)
         # 获取描述
-        text_description = soup.html.head.description
-        text_description_list = self.separatewords(text_description)
-        self.add_location(urlinfo,text_description_list,3)
+        if soup.html.head.description:
+            text_description = soup.html.head.description.get_text().strip()
+            text_description_list = self.separatewords(text_description)
+            self.add_location(urlinfo,text_description_list,3)
         # 获取内容
-        text_content = self.get_content(soup.body)
+        text_content = self.get_content(soup.body,0)
         text_content_list = self.separatewords(text_content)
         self.add_location(urlinfo,text_content_list,4)
 
     '''提取分词'''
 
     def separatewords(self,text):
-        sys.setrecursionlimit(10000)
-        lenth = len(text)
+        if not text:return []
         text_list = []
         if not type(text) is unicode:
             try:
                 text = unicode(text,"utf-8")
             except:
-                text = unicode(text,"gbk")
+                text = text.decode("gbk")
         # 提取中文
-        blocks = re.split(ur"([^\u4E00-\u9FA5]+)",sentence)
+        blocks = re.split(ur"([^\u4E00-\u9FA5]+)",text)
         for block_words in blocks:
             if re.match(ur"[\u4E00-\u9FA5]+",block_words):
+                lenth = len(block_words)
                 for i in range(lenth):
                     text_list.append(block_words[i])
                 return text_list
+
+    '''添加HTML内容对应语音库的位置'''
 
     def add_location(self,urlinfo,words,type = 0):
         if not words:return
@@ -106,6 +115,8 @@ class Crawl(object):
             word = self.get_word(words[i])
             if word:
                 WordLocation.objects.create(url=urlinfo,word=word,location=i,location_type=type)
+
+    '''添加链接'''
 
     def add_link(self,from_url,to_url,link_text):
         try:
@@ -117,9 +128,14 @@ class Crawl(object):
         linkinfo = LinkInfo.objects.create(from_url=url_from,to_url=url_to,createtime=time.time())
         if link_text:
             words = self.separatewords(link_text)
+            if not words:
+                return
             for word in words:
-                LinkWords.objects.create(link=linkinfo,word=word)
+                wordinfo = self.get_word(word)
+                if not wordinfo:continue
+                LinkWords.objects.create(link=linkinfo,word=wordinfo)
 
+    '''获取词的位置'''
 
     def get_word(self,word):
         words = WordInfo.objects.filter(word=word)
@@ -127,9 +143,10 @@ class Crawl(object):
             return words[0]
         return None
 
+    '''解析HTML内容'''
 
     def get_content(self, soup, depth=0):
-        if depth > 17:return ""
+        #if depth > 17:return ""
         v = soup.string
         if v == None:
             c = soup.contents

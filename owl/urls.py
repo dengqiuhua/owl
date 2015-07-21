@@ -21,7 +21,7 @@ from owl.search.views import Index
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url(r'^s/', include("owl.search.urls")),
+    url(r'^', include("owl.search.urls")),
     url(r'^m/', include("owl.spider.urls")),
     url(r'^$', Index.as_view(), name="site-index"),
 ]
