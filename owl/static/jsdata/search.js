@@ -19,9 +19,9 @@ function fillSearchResult(msg){
         $.each(msg,function(i,n) {
             if(n.url != null) {
                 html += "<div class=\"row\">";
-                html += "<h4><a href=\"" + n.url.url + "\" target=\"_blank\">" + n.url.url + "</a></h4>";
+                html += "<h4><a href=\"" + n.url + "\" target=\"_blank\">" + n.url + "</a></h4>";
                 html += "<div>";
-                html += "<p>描述</p>";
+                html += "<p>"+ n.description +"</p>";
                 html += "</div>";
                 html += "<div>";
                 html += "<span class=\"muted\">来源</span>";

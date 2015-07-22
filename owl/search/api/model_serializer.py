@@ -3,6 +3,13 @@
 from rest_framework import serializers
 
 '''url序列化'''
+class UrlResultSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    url = serializers.CharField()
+    description = serializers.CharField()
+    score = serializers.FloatField()
+
+'''url序列化'''
 class UrlSerializer(serializers.Serializer):
     id=serializers.IntegerField()
     url=serializers.CharField()
