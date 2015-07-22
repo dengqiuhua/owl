@@ -8,6 +8,7 @@ urlpatterns = patterns(
     '',
     #url(r'^$', Index.as_view(), name="search-index"),
     url(r'^s/$', Searching.as_view(), name="search-result"),
+    url(r'^link/$', Link.as_view(), name="search-link"),
     url(r'^api/search/$', SearchResult.as_view(), name="api-search-result"),
 
 )

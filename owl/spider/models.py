@@ -16,6 +16,10 @@ class UrlInfo(models.Model):
     def isIndexed(url_encrypt):
         return UrlInfo.objects.filter(url_encrypt=url_encrypt).count() > 0
 
+    def addClick(self):
+        self.click_counts = self.click_counts + 1
+        self.save()
+
 
 class WordInfo(models.Model):
     class Meta:

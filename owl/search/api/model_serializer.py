@@ -7,6 +7,7 @@ class UrlResultSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     url = serializers.CharField()
     description = serializers.CharField()
+    code = serializers.CharField()
     score = serializers.FloatField()
 
 '''url序列化'''

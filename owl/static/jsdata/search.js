@@ -19,7 +19,7 @@ function fillSearchResult(msg){
         $.each(msg,function(i,n) {
             if(n.url != null) {
                 html += "<div class=\"row\">";
-                html += "<h4><a href=\"" + n.url + "\" target=\"_blank\">" + n.url + "</a></h4>";
+                html += "<h4><a href=\"" + (urls.url_link + "?url=" + n.code) + "\" target=\"_blank\">" + n.url + "</a></h4>";
                 html += "<div>";
                 html += "<p>"+ n.description +"</p>";
                 html += "</div>";

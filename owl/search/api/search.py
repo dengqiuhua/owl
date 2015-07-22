@@ -27,10 +27,12 @@ class Searcher(object):
     def formatResult(self,datalist):
         newlist = []
         if datalist:
-            for urlid,score in datalist.items():
+            for urlid,score in datalist:
+                urlinfo = UrlInfo.objects.get(id=urlid)
                 res = UrlResultSerializer()
                 res.id = urlid
-                res.url = UrlInfo.objects.get(id=urlid).url
+                res.url = urlinfo.url
+                res.code = urlinfo.url_encrypt
                 res.description = self.getDescription(urlid)
                 res.score = score
                 newlist.append(res)
@@ -52,8 +54,65 @@ class Searcher(object):
     def getScoredList(self,rows):
         if rows:
             urls = dict([(row[0],0) for row in rows])
-            return urls
+            #各维度权重[词频，文档位置，词间距]
+            weights = [(1.0, self.getFrequencyScore(rows)),(1.5, self.getLocationScore(rows)),(2.0, self.getDistanceScore(rows))]
+            for weight,scores in weights:
+                for url in urls:
+                    urls[url] += weight * scores[url]
+            # 降序排列
+            rankedResults = sorted([(url,score) for url,score in urls.items()],reverse=1)
+            return rankedResults
         return []
+
+    '''根据词频排序'''
+
+    def getFrequencyScore(self,rows):
+        if rows:
+            counts = dict([(row[0],0) for row in rows])
+            for row in rows:
+                counts[row[0]] += 1
+            return self.normalizeScores(counts)
+        return rows
+
+    '''根据字在文档的位置'''
+
+    def getLocationScore(self,rows):
+        if rows:
+            #填入一个标准位置
+            locations = dict([(row[0],1000000) for row in rows])
+            for row in rows:
+                location = sum(row[1:]) # 这几个个字所有位置的总和
+                # 总和小于1000000
+                if location < locations[row[0]]:locations[row[0]] = location
+            return self.normalizeScores(locations,True)
+        return rows
+
+    '''根据字间距'''
+
+    def getDistanceScore(self,rows):
+        if rows:
+            if len(rows[0]) <= 2:return dict([(row[0], 1.0) for row in rows])
+            #填入一个标准距离
+            minDistance = dict([(row[0], 1000000) for row in rows])
+            for row in rows:
+                dlist = sum([abs(row[i] - row[i-1]) for i in range(2,len(row))])
+                # 总和小于1000000
+                if dlist < minDistance[row[0]] : minDistance[row[0]] = dlist
+            return self.normalizeScores(minDistance,True)
+        return rows
+
+    '''归一化函数'''
+
+    def normalizeScores(self,scores,small = False):
+        vsmall = 0.0001 # 避免被0整除
+        if small:
+            # 越小越好
+            minscore = min(scores.values())
+            return dict([(url,float(minscore) / max(vsmall,counts)) for (url,counts) in scores.items()])
+        else:
+            maxscore = max(scores.values())
+            if maxscore == 0 : maxscore = vsmall
+            return dict([(url,float(counts) / maxscore) for (url,counts) in scores.items()])
 
     '''获取匹配的词的位置'''
 
