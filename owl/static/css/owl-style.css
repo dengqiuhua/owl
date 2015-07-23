@@ -1,14 +1,14 @@
 body{padding-top: 44px;}
-footer{text-align: center; margin-top: 20px;}
+footer{text-align: center; margin-top: 20px;width: 100%;}
 #search-plan {
     margin: 0 auto;
-    margin-top: 10%;
     max-width: 820px;
     padding: 15px;
 }
-#search-logo{text-align: center;}
+#search-logo{text-align: center;width:320px;height:270px;background-repeat: no-repeat;background-position: center;margin: 0 auto; background-image: url("/static/img/logo.jpg");}
 #form-search {
-    margin-top: 60px;
+    margin-top: 2px;
 }
+#result-form-search{margin-top: 40px;}
 #spider-search{margin-bottom: 32px;}
 .nav-sidebar li.active a{background-color:#428bca;color: #fff;}

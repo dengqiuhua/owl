@@ -10,11 +10,16 @@ import re
 class Searcher(object):
 
     def Search(self,kw,pageindex = 1, pagesize = 10):
+        # 分词
         keywords = self.separatewords(kw)
         if keywords:
+            # 获取匹配的语料库
             wordlist = self.getWordInfoList(keywords)
+            # 匹配关键词的文档位置
             rows = self.getMatchWordLocation(wordlist)
-            rankedResult = self.getScoredList(rows)
+            # 已排序好的搜索结果
+            rankedResult = self.getScoredList(rows,wordlist)
+            # 格式化搜索结果
             location = self.formatResult(rankedResult)
             #print(location)
             #return
@@ -51,11 +56,12 @@ class Searcher(object):
 
     '''获取排序的结果'''
 
-    def getScoredList(self,rows):
+    def getScoredList(self,rows,wordlist = None):
         if rows:
             urls = dict([(row[0],0) for row in rows])
             #各维度权重[词频，文档位置，词间距]
-            weights = [(1.0, self.getFrequencyScore(rows)),(1.5, self.getLocationScore(rows)),(2.0, self.getDistanceScore(rows))]
+            weights = [(1.0, self.getFrequencyScore(rows)),(1.5, self.getLocationScore(rows)),(2.0, self.getDistanceScore(rows)),
+                       (1.0, self.getOutLinkScore(rows)),(1.0,self.getLinkTextScore(rows,wordlist))]
             for weight,scores in weights:
                 for url in urls:
                     urls[url] += weight * scores[url]
@@ -99,6 +105,31 @@ class Searcher(object):
                 # 总和小于1000000
                 if dlist < minDistance[row[0]] : minDistance[row[0]] = dlist
             return self.normalizeScores(minDistance,True)
+        return rows
+
+    '''根据外部链接'''
+
+    def getOutLinkScore(self,rows):
+        if rows:
+            urls = set([row[0] for row in rows])
+            url_counts = dict([(url,LinkInfo.objects.filter(to_url__id=url).count()) for url in urls])
+            return self.normalizeScores(url_counts)
+        return rows
+
+    '''根据链接文本读取'''
+
+    def getLinkTextScore(self,rows,wordlist):
+        if rows and wordlist:
+            links = dict([(row[0],0) for row in rows])
+            # 去重链接
+            urllist = set([row[0] for row in rows])
+            for word in wordlist:
+                linkwords = LinkWords.objects.filter(word=word)
+                if linkwords:
+                    for linkword in linkwords:
+                        if linkword.link.to_url.id in urllist:
+                            links[linkword.link.to_url.id] +=1
+            return self.normalizeScores(links)
         return rows
 
     '''归一化函数'''
