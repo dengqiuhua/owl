@@ -82,7 +82,7 @@ class Crawl(object):
             text_description_list = self.separatewords(text_description)
             self.add_location(urlinfo,text_description_list,3)
         # 获取内容
-        text_content = self.get_content(soup.body,0)
+        text_content = self.get_content(soup.html.body,0)
         text_content_list = self.separatewords(text_content)
         self.add_location(urlinfo,text_content_list,4)
 
@@ -103,18 +103,21 @@ class Crawl(object):
                 lenth = len(block_words)
                 for i in range(lenth):
                     text_list.append(block_words[i])
-                return text_list
+        return text_list
 
     '''添加HTML内容对应语音库的位置'''
 
     def add_location(self,urlinfo,words,type = 0):
         if not words:return
+        querysetlist = []
         counts = len(words)
         for i in range(counts):
             if words[i] in self.ignorewords:continue
             word = self.get_word(words[i])
             if word:
-                WordLocation.objects.create(url=urlinfo,word=word,location=i,location_type=type)
+                querysetlist.append(WordLocation(url=urlinfo,word=word,location=i,location_type=type))
+        if querysetlist:
+            WordLocation.objects.bulk_create(querysetlist)
 
     '''添加链接'''
 
@@ -152,6 +155,8 @@ class Crawl(object):
             c = soup.contents
             text = ""
             for t in c:
+                # 过滤链接
+                if t.name == "a":continue
                 subtext = self.get_content(t, depth+1)
                 text += subtext + '\n'
             return text
