@@ -45,8 +45,9 @@ class Searcher(object):
 
     '''获取描述'''
 
-    def getDescription(self,urlid):
-        locations = WordLocation.objects.filter(url__id=urlid)
+    def getDescription(self,urlid,length = 300):
+        # 获取正文
+        locations = WordLocation.objects.filter(url__id=urlid,location_type=4)[0:length]
         if locations:
             desc = ""
             for location in locations:
@@ -59,7 +60,7 @@ class Searcher(object):
     def getScoredList(self,rows,wordlist = None):
         if rows:
             urls = dict([(row[0],0) for row in rows])
-            #各维度权重[词频，文档位置，词间距]
+            #各维度权重[词频，文档位置，词间距，外链，链接文本]
             weights = [(1.0, self.getFrequencyScore(rows)),(1.5, self.getLocationScore(rows)),(2.0, self.getDistanceScore(rows)),
                        (1.0, self.getOutLinkScore(rows)),(1.0,self.getLinkTextScore(rows,wordlist))]
             for weight,scores in weights:
